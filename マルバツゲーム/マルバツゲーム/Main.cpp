@@ -5,8 +5,13 @@ using namespace std;
 
 enum State{
 	NONE, //空マス(0)
-	PLAYER, //プレイヤー(1)
-	ENEMY //敵マス(2)
+	MARU, //プレイヤー(1)
+	BATSU //敵マス(2)
+};
+
+enum Turn{
+	PLAYER,
+	ENEMY
 };
 
 struct Board{
@@ -24,7 +29,7 @@ void EnemyTurn();//敵
 void gameResult(); //結果発表
 
 bool bGameSet = false;
-bool Turn = true; //(true):プレイヤー,(false):COM
+Turn T = PLAYER; //プレイヤー,COM
 bool is_End = true;
 
 
@@ -38,7 +43,7 @@ int main(void){
 	do{
 		PlayerTurn();
 	//	if (board.Check()){ bGameSet = true;  break; }
-	//	EnemyTurn();
+		EnemyTurn();
 	//	if (board.Check()){ bGameSet = true; break; }
 	}while (!bGameSet);
 
@@ -50,6 +55,7 @@ int main(void){
 //プレイヤーの処理
 void PlayerTurn()
 {
+	T = PLAYER;
 	int nSelect = 0;
 	cout << "あなたのターンです。\nどの位置を選択しますか？(1~9)" << endl;
 	board.Show();
@@ -61,7 +67,7 @@ void PlayerTurn()
 		cin >> nSelect;
 	}
 
-	while (board.Set(nSelect, Turn) == 1){
+	while (board.Set(nSelect, T) == 1){
 		cout << "1~9のいずれかを入力してください。" << endl;
 		cin >> nSelect;
 	}
@@ -69,12 +75,11 @@ void PlayerTurn()
 
 //COM側の処理
 void EnemyTurn(){
-	int nSelect = 0;
-	cout << "COMのターンです。" << endl;
-
-
-
-	board.Set(nSelect, Turn);
+	T = ENEMY;
+	int nSelect = 5;
+	cout << "COMのターンです。"  << endl;
+	cout << "COMは" << nSelect << "番を選択しました。" << endl;
+	board.Set(nSelect, T);
 }
 
 //盤面を初期化する
@@ -96,16 +101,16 @@ void Board::Show(){
 //n番目にセットする。
 int Board::Set(int n,bool turn)
 {
-	if (nBorad[n-1] == PLAYER || nBorad[n-1] == ENEMY){
-		cout << "そこには置けません。" << endl;
+	if (nBorad[n-1] == MARU || nBorad[n-1] == BATSU){
+		cout << "残念ながらそこには置けません。" << endl;
 		return 1;
 	}
 
-	if (turn){ //プレイヤー
-		nBorad[n-1] = PLAYER;
+	if (T == PLAYER){ //プレイヤー
+		nBorad[n-1] = MARU;
 	}
 	else{  //COM
-		nBorad[n-1] = ENEMY;
+		nBorad[n-1] = BATSU;
 	}
 	return 0;
 }
