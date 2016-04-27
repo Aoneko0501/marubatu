@@ -1,6 +1,14 @@
 // 三項演算子を用いたマルバツゲームを作る
 
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #include<iostream>
+#include<windows.h>
+#include<stdlib.h>
+#include<string>
+#include<string.h>
+#include<sstream>
+
 using namespace std;
 
 enum State{
@@ -18,10 +26,11 @@ struct Board{
 public:
 	void Clear(); //盤面を初期化
 	void Show(); //盤面を表示
-	int Set(int n,bool turn); //盤面にセット
+	int Set(int n, Turn turn); //盤面にセット
 	int Check(); //勝敗判定
 protected:
-	State nBorad[9];//盤面 
+	State nBoard[9];//盤面 
+	char* cBoard[9];
 };
 
 void PlayerTurn(); //プレイヤー
@@ -29,7 +38,7 @@ void EnemyTurn();//敵
 void gameResult(); //結果発表
 
 bool bGameSet = false;
-Turn T = PLAYER; //プレイヤー,COM
+static Turn T = PLAYER; //プレイヤー,COM
 bool is_End = true;
 
 
@@ -42,10 +51,10 @@ int main(void){
 	//勝敗が決まるまで無限ループ
 	do{
 		PlayerTurn();
-	//	if (board.Check()){ bGameSet = true;  break; }
+		//	if (board.Check()){ bGameSet = true;  break; }
 		EnemyTurn();
-	//	if (board.Check()){ bGameSet = true; break; }
-	}while (!bGameSet);
+		//	if (board.Check()){ bGameSet = true; break; }
+	} while (!bGameSet);
 
 	//gameResult(); //結果発表
 
@@ -61,7 +70,7 @@ void PlayerTurn()
 	board.Show();
 
 	cin >> nSelect;
-	while (nSelect <= 0||nSelect >= 10){
+	while (nSelect <= 0 || nSelect >= 10){
 		nSelect = 0;
 		cout << "\a(1~9)のいずれかを入力してください。" << endl;
 		cin >> nSelect;
@@ -77,7 +86,8 @@ void PlayerTurn()
 void EnemyTurn(){
 	T = ENEMY;
 	int nSelect = 5;
-	cout << "COMのターンです。"  << endl;
+	cout << "COMのターンです。" << endl;
+	Sleep(3000);
 	cout << "COMは" << nSelect << "番を選択しました。" << endl;
 	board.Set(nSelect, T);
 }
@@ -85,32 +95,50 @@ void EnemyTurn(){
 //盤面を初期化する
 void Board::Clear(){
 	for (int i = 0; i < 9; i++){
-		nBorad[i] = NONE;
+		nBoard[i] = NONE;
+		strcpy(cBoard[i], "0");
 	}
 }
 
 //盤面を表示
 void Board::Show(){
-	cout << nBorad[0] <<"｜" << nBorad[1]<< "｜"<< nBorad[2]<<endl;
+	string s;
+	for (int i = 0; i < 9; i++){
+		switch (nBoard[i]){
+		case NONE:
+			s = to_string(i);
+			strcpy(cBoard[i], s.data());
+			break;
+		case MARU:
+			strcpy(cBoard[i], "o");
+			break;
+		case BATSU:
+			strcpy(cBoard[i], "x");
+			break;
+		}
+	}
+
+
+	cout << cBoard[0] << "｜" << cBoard[1] << "｜" << cBoard[2] << endl;
 	cout << "-" << "＋" << "-" << "＋" << "-" << endl;
-	cout << nBorad[3] << "｜" << nBorad[4] << "｜" << nBorad[5] << endl;
+	cout << cBoard[3] << "｜" << cBoard[4] << "｜" << cBoard[5] << endl;
 	cout << "-" << "＋" << "-" << "＋" << "-" << endl;
-	cout << nBorad[6] << "｜" << nBorad[7] << "｜" << nBorad[8] << endl;
+	cout << cBoard[6] << "｜" << cBoard[7] << "｜" << cBoard[8] << endl;
 }
 
 //n番目にセットする。
-int Board::Set(int n,bool turn)
+int Board::Set(int n, Turn turn)
 {
-	if (nBorad[n-1] == MARU || nBorad[n-1] == BATSU){
+	if (nBoard[n - 1] == MARU || nBoard[n - 1] == BATSU){
 		cout << "残念ながらそこには置けません。" << endl;
 		return 1;
 	}
 
 	if (T == PLAYER){ //プレイヤー
-		nBorad[n-1] = MARU;
+		nBoard[n - 1] = MARU;
 	}
 	else{  //COM
-		nBorad[n-1] = BATSU;
+		nBoard[n - 1] = BATSU;
 	}
 	return 0;
 }
