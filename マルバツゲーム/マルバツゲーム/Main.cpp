@@ -30,7 +30,7 @@ public:
 	int Check(); //Ÿ”s”»’è
 protected:
 	State nBoard[9];//”Õ–Ê 
-	char* cBoard[9];
+	char cBoard[9];
 };
 
 void PlayerTurn(); //ƒvƒŒƒCƒ„[
@@ -94,9 +94,9 @@ void EnemyTurn(){
 
 //”Õ–Ê‚ğ‰Šú‰»‚·‚é
 void Board::Clear(){
+	string s;
 	for (int i = 0; i < 9; i++){
 		nBoard[i] = NONE;
-		strcpy(cBoard[i], "0");
 	}
 }
 
@@ -106,14 +106,14 @@ void Board::Show(){
 	for (int i = 0; i < 9; i++){
 		switch (nBoard[i]){
 		case NONE:
-			s = to_string(i);
-			strcpy(cBoard[i], s.data());
+			s = to_string(i+1);
+			strcpy(&cBoard[i], s.c_str());
 			break;
 		case MARU:
-			strcpy(cBoard[i], "o");
+			strcpy(&cBoard[i], "o");
 			break;
 		case BATSU:
-			strcpy(cBoard[i], "x");
+			strcpy(&cBoard[i], "x");
 			break;
 		}
 	}
