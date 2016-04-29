@@ -106,7 +106,7 @@ void Board::Show(){
 	for (int i = 0; i < 9; i++){
 		switch (nBoard[i]){
 		case NONE:
-			s = to_string(i+1);
+			s = to_string(i + 1);
 			strcpy(&cBoard[i], s.c_str());
 			break;
 		case MARU:
