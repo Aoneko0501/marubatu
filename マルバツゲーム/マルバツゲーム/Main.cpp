@@ -129,6 +129,8 @@ void Board::Show(){
 //n番目にセットする。
 int Board::Set(int n, Turn turn)
 {
+	
+
 	if (nBoard[n - 1] == MARU || nBoard[n - 1] == BATSU){
 		cout << "残念ながらそこには置けません。" << endl;
 		return 1;
