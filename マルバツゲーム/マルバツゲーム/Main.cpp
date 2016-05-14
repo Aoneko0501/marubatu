@@ -41,6 +41,8 @@ bool bGameSet = false;
 static Turn T = PLAYER; //プレイヤー,COM
 bool is_End = true;
 
+int Result = 0;
+
 
 Board board;
 
@@ -51,12 +53,12 @@ int main(void) {
 	//勝敗が決まるまで無限ループ
 	do {
 		PlayerTurn();
-			if (board.Check() != 0){ bGameSet = true;  break; }
-		EnemyTurn();
-			if (board.Check() != 0){ bGameSet = true; break; }
+		if (board.Check() != 0) { bGameSet = true; Result = 1;  break; }
+		//EnemyTurn();
+		//if (board.Check() != 0){ bGameSet = true; Result = 2; break; }
 	} while (!bGameSet);
 
-	gameResult(board.Check()); //結果発表
+	gameResult(Result); //結果発表
 	board.Show();
 	return 0;
 }
@@ -85,7 +87,7 @@ void PlayerTurn()
 //COM側の処理
 void EnemyTurn() {
 	T = ENEMY;
-	int nSelect = 5;
+	int nSelect = 8;
 	cout << "COMのターンです。" << endl;
 	Sleep(3000);
 	cout << "COMは" << nSelect << "番を選択しました。" << endl;
@@ -154,21 +156,19 @@ int Board::Check()
 	//横判定
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (cBoard[mark] == 'o') {
+			switch (nBoard[mark]) {
+			case MARU:
 				point++;
-				if (point == 3) return 1;
-				mark++;
-			}
-			else if (cBoard[mark] == 'x') {
+				if (point == 3)return 1;
+				break;
+			case BATSU:
 				point = point + 2;
-				if (point == 6) return 2;
-				mark++;
-			}
-			else {
+				if (point == 6)return 2;
+				break;
+			default:
 				point = 0;
-				mark++;
 			}
-			printf("%d\n", point);
+			mark++;
 		}
 		point = 0;
 	}
@@ -176,43 +176,46 @@ int Board::Check()
 	mark = 0;
 
 	//縦判定
+
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (cBoard[mark] == 'o') {
+			switch (nBoard[mark]) {
+			case MARU:
 				point++;
-				if (point == 3) return 1;
-				mark = mark + 3;
-			}
-			else if (cBoard[mark] == 'x') {
+				if (point == 3)return 1;
+				break;
+			case BATSU:
 				point = point + 2;
-				if (point == 6) return 2;
-				mark = mark + 3;
-			}
-			else {
+				if (point == 6)return 2;
+				break;
+			default:
 				point = 0;
-				mark = mark + 3;
 			}
-			mark = j;
+			mark = mark + 3;
 		}
+		mark = i + 1;
+		point = 0;
 	}
 	point = 0;
 	mark = 0;
 
 	// 斜め右下
 	for (int i = 0; i < 3; i++) {
-		if (cBoard[mark] == 'o') {
+		switch (nBoard[mark]) {
+		case MARU:
 			point++;
-			if (point == 3) return 1;
+			if (point == 3)return 1;
 			mark = mark + 4;
-		}
-		else if (cBoard[mark] == 'x') {
+			break;
+		case BATSU:
 			point = point + 2;
-			if (point == 6) return 2;
+			if (point == 6)return 2;
 			mark = mark + 4;
-		}
-		else {
+			break;
+		default:
 			point = 0;
 			mark = mark + 4;
+			break;
 		}
 	}
 
@@ -220,19 +223,20 @@ int Board::Check()
 	mark = 2;
 	// 斜め右上
 	for (int i = 0; i < 3; i++) {
-		if (cBoard[mark] == 'o') {
+		switch (nBoard[mark]) {
+		case MARU:
 			point++;
-			if (point == 3) return 1;
+			if (point == 3)return 1;
 			mark = mark + 2;
-		}
-		else if (cBoard[mark] == 'x') {
+			break;
+		case BATSU:
 			point = point + 2;
-			if (point == 6) return 2;
+			if (point == 6)return 2;
 			mark = mark + 2;
-		}
-		else {
+			break;
+		default:
 			point = 0;
-			mark = mark + 4;
+			mark = mark + 2;
 		}
 	}
 
@@ -240,11 +244,11 @@ int Board::Check()
 }
 
 void gameResult(int res) {
-	
+
 	if (res == 1) {
 		printf("プレイヤーの勝利です。\n");
 	}
-	else if(res == 2){
+	else if (res == 2) {
 		printf("COMの勝利です。\n");
 	}
 	else {
