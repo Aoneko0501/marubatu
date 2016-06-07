@@ -8,6 +8,13 @@
 #include<string>
 #include<string.h>
 #include<sstream>
+#include<time.h>
+
+inline void InitRand()
+{
+	srand((unsigned int)time(NULL));
+}
+
 
 using namespace std;
 
@@ -36,30 +43,48 @@ protected:
 void PlayerTurn(); //プレイヤー
 void EnemyTurn();//敵
 void gameResult(int res); //結果発表
+void Auto();
 
 bool bGameSet = false;
 static Turn T = PLAYER; //プレイヤー,COM
-bool is_End = true;
 
 int Result = 0;
+int Dice();
+int Count = 0;
+
+bool Game = true;
+char str;
 
 
 Board board;
 
 int main(void) {
 	// 盤面を初期化する
-	board.Clear();
+	while(Game) {
+		InitRand();
+		board.Clear();
 
-	//勝敗が決まるまで無限ループ
-	do {
-		PlayerTurn();
-		if (board.Check() != 0) { bGameSet = true; Result = 1;  break; }
-		//EnemyTurn();
-		//if (board.Check() != 0){ bGameSet = true; Result = 2; break; }
-	} while (!bGameSet);
+		//勝敗が決まるまで無限ループ
+		do {
+			//PlayerTurn();
+			Auto();
+			board.Show();
+			Result = board.Check();
+			if (Result == 1 || Result == 3) { bGameSet = true; break; }
+			EnemyTurn();
+			board.Show();
+			Result = board.Check();
+			if (Result == 2) { bGameSet = true; break; }
 
-	gameResult(Result); //結果発表
-	board.Show();
+		} while (!bGameSet);
+
+		gameResult(Result); //結果発表
+		board.Show();
+		printf("もう一度？(y/n)");
+		cin >> str;
+		if (tolower(str) == 'n')Game = false; 
+
+	}
 	return 0;
 }
 
@@ -87,16 +112,53 @@ void PlayerTurn()
 //COM側の処理
 void EnemyTurn() {
 	T = ENEMY;
-	int nSelect = 8;
+	int nSelect;
 	cout << "COMのターンです。" << endl;
-	Sleep(3000);
+	//Sleep(1500);
+
+	nSelect = Dice();
+
+	while (nSelect <= 0 || nSelect >= 10) {
+		nSelect = 0;
+		//cout << "\a(1~9)のいずれかを入力してください。" << endl;
+		nSelect = Dice();
+	}
+
+	while (board.Set(nSelect, T) == 1) {
+		//cout << "1~9のいずれかを入力してください。" << endl;
+		nSelect = Dice();
+	}
 	cout << "COMは" << nSelect << "番を選択しました。" << endl;
-	board.Set(nSelect, T);
+}
+
+void Auto()
+{
+	T = PLAYER;
+	int nSelect;
+	cout << "AUTOのターンです。" << endl;
+	//Sleep(1500);
+
+	nSelect = Dice();
+
+	while (nSelect <= 0 || nSelect >= 10) {
+		nSelect = 0;
+		//cout << "\a(1~9)のいずれかを入力してください。" << endl;
+		nSelect = Dice();
+	}
+
+	while (board.Set(nSelect, T) == 1) {
+		//cout << "1~9のいずれかを入力してください。" << endl;
+		nSelect = Dice();
+	}
+	cout << "AUTOは" << nSelect << "番を選択しました。" << endl;
 }
 
 //盤面を初期化する
 void Board::Clear() {
 	string s;
+	bGameSet = false;
+	Count = 0;
+	Result = 0;
 	for (int i = 0; i < 9; i++) {
 		nBoard[i] = NONE;
 	}
@@ -128,6 +190,10 @@ void Board::Show() {
 	cout << cBoard[6] << "｜" << cBoard[7] << "｜" << cBoard[8] << endl;
 }
 
+int Dice() {
+	return rand() % 9 + 1;
+}
+
 //n番目にセットする。
 int Board::Set(int n, Turn turn)
 {
@@ -150,7 +216,8 @@ int Board::Set(int n, Turn turn)
 //勝敗判定
 int Board::Check()
 {
-	int point = 0;
+	int point_P = 0;
+	int point_E = 0;
 	int mark = 0;
 
 	//横判定
@@ -158,21 +225,26 @@ int Board::Check()
 		for (int j = 0; j < 3; j++) {
 			switch (nBoard[mark]) {
 			case MARU:
-				point++;
-				if (point == 3)return 1;
+				point_P++;
+				if (point_P == 3)return 1;
 				break;
 			case BATSU:
-				point = point + 2;
-				if (point == 6)return 2;
+				point_E++;
+				if (point_E == 3)return 2;
 				break;
 			default:
-				point = 0;
+				point_P = 0;
+				point_E = 0;
+				break;
 			}
 			mark++;
+			printf("%d:%d\n", mark, point_P);
 		}
-		point = 0;
+		point_P = 0;
+		point_E = 0;
 	}
-	point = 0;
+	point_P = 0;
+	point_E = 0;
 	mark = 0;
 
 	//縦判定
@@ -181,64 +253,75 @@ int Board::Check()
 		for (int j = 0; j < 3; j++) {
 			switch (nBoard[mark]) {
 			case MARU:
-				point++;
-				if (point == 3)return 1;
+				point_P++;
+				if (point_P == 3)return 1;
 				break;
 			case BATSU:
-				point = point + 2;
-				if (point == 6)return 2;
+				point_E++;
+				if (point_E == 3)return 2;
 				break;
 			default:
-				point = 0;
+				point_P = 0;
+				point_E = 0;
+				break;
 			}
 			mark = mark + 3;
 		}
 		mark = i + 1;
-		point = 0;
+		point_P = 0;
+		point_E = 0;
 	}
-	point = 0;
+	point_P = 0;
+	point_E = 0;
 	mark = 0;
 
 	// 斜め右下
 	for (int i = 0; i < 3; i++) {
 		switch (nBoard[mark]) {
 		case MARU:
-			point++;
-			if (point == 3)return 1;
+			point_P++;
+			if (point_P == 3)return 1;
 			mark = mark + 4;
 			break;
 		case BATSU:
-			point = point + 2;
-			if (point == 6)return 2;
+			point_E++;
+			if (point_E == 3)return 2;
 			mark = mark + 4;
 			break;
 		default:
-			point = 0;
+			point_P = 0;
+			point_E = 0;
 			mark = mark + 4;
 			break;
 		}
 	}
 
-	point = 0;
+	point_P = 0;
+	point_E = 0;
 	mark = 2;
 	// 斜め右上
 	for (int i = 0; i < 3; i++) {
 		switch (nBoard[mark]) {
 		case MARU:
-			point++;
-			if (point == 3)return 1;
+			point_P++;
+			if (point_P == 3)return 1;
 			mark = mark + 2;
 			break;
 		case BATSU:
-			point = point + 2;
-			if (point == 6)return 2;
+			point_E++;
+			if (point_E == 3)return 2;
 			mark = mark + 2;
 			break;
 		default:
-			point = 0;
+			point_P = 0;
+			point_E = 0;
 			mark = mark + 2;
+			break;
 		}
 	}
+	printf("%dターン目\n", Count+1);
+	Count++;
+	if (Count == 9) return 3;
 
 	return 0;
 }
